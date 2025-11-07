@@ -20,25 +20,45 @@ machine learning, and rule-based adjustments.
 ## Architecture
 
 mapaq-risk-intelligence/
+
 ├── data/
+
 │ ├── raw/
+
 │ ├── cleaned/
+
 │ └── regulations.json
+
 ├── src/
+
 │ ├── data_ingest.py
+
 │ ├── data_cleaner.py
+
 │ ├── theme_classifier.py
+
 │ ├── address_geocoder.py
+
 │ ├── probability_model.py
+
 │ ├── regulation_adapter.py
+
 │ └── api.py
+
 ├── dashboard/
+
 │ ├── app.py
+
 │ └── templates/
+
 ├── tests/
+
 │ ├── test_model.py
+
 │ ├── test_api.py
+
 │ └── test_regulation_adapter.py
+
 └── README.md
 
 
