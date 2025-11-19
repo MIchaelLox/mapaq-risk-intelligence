@@ -1,1 +1,2 @@
-# TODO: expose /predict endpoint
+# TODO: implement data ingestion logic
+
