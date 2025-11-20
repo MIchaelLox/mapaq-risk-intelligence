@@ -1,2 +1,14 @@
 # Ignore PyCharm settings
 .idea/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtualenv
+.venv/
+env/
+venv/
+
+# Misc
+*.log
