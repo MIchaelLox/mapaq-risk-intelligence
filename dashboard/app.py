@@ -1,43 +1,32 @@
-# TODO: implement data ingestion logic
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, render_template, request
+from src.probability_model import get_risk_for
 
-from src.api import risk_service
-from src.config import API_PREFIX
+app = Flask(__name__)
 
-app = Flask(__name__, template_folder="templates")
+THEMES = ["fast_food", "casual_dining", "fine_dining"]
+CITIES = ["Montreal", "Quebec", "Laval"]
 
+@app.route("/", methods=["GET", "POST"])
+def index():
+   probability = None
+   risk_level = None
 
-@app.route("/")
-def index() -> str:
-    return render_template("index.html")
+   if request.method == "POST":
+       theme = request.form["theme"]
+       city = request.form["city"]
+       p = get_risk_for(theme, city)
+       probability = round(p, 3)
+       if p < 0.33:
+           risk_level = "Low"
+       elif p < 0.66:
+           risk_level = "Medium"
+       else:
+           risk_level = "High"
 
-
-@app.get("/api/health")
-def health():
-    return jsonify({"status": "ok"})
-
-
-@app.post(f"{API_PREFIX}/predict")
-def predict():
-    """
-    Expects a JSON body like:
-
-    {
-      "theme": "Sushi",
-      "staff_count": 10,
-      "infractions_history": 2,
-      "kitchen_size": 30.0,
-      "region": "Montreal",
-      "inspection_date": "2024-11-01"
-    }
-    """
-    data = request.get_json(silent=True)
-    if data is None:
-        return jsonify({"error": "Invalid JSON body"}), 400
-
-    try:
-        result = risk_service.predict(data)
-    except ValueError as exc:
-        return jsonify({"error": str(exc)}), 400
-
-    return jsonify(result.to_dict())
+   return render_template(
+       "index.html",
+       themes=THEMES,
+       cities=CITIES,
+       probability=probability,
+       risk_level=risk_level,
+   )

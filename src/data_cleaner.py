@@ -1,96 +1,85 @@
-# TODO: implement data ingestion logic
-from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict
-
 import pandas as pd
 
+from .data_ingest import load_raw_mapaq
 
-@dataclass
-class CleaningStats:
-    rows_before: int = 0
-    rows_after: int = 0
-    cols_before: int = 0
-    cols_after: int = 0
+ROOT_DIR = Path(__file__).resolve().parents[1]
+DATA_DIR = ROOT_DIR / "data"
+CLEANED_DIR = DATA_DIR / "cleaned"
+CLEANED_DIR.mkdir(parents=True, exist_ok=True)
+CLEANED_FILE = CLEANED_DIR / "mapaq_cleaned.csv"
 
-    def to_dict(self) -> Dict[str, int]:
-        return {
-            "rows_before": self.rows_before,
-            "rows_after": self.rows_after,
-            "cols_before": self.cols_before,
-            "cols_after": self.cols_after,
-        }
+# Standardize multiple possible column names
+COLUMN_MAPPING: Dict[str, str] = {
+    "RestaurantName": "name",
+    "NomEtablissement": "name",
+    "Address": "address",
+    "Adresse": "address",
+    "City": "city",
+    "Ville": "city",
+    "Theme": "theme",
+    "Categorie": "theme",
+    "InspectionDate": "inspection_date",
+    "DateInspection": "inspection_date",
+    "InfractionCount": "infraction_count",
+    "NombreInfractions": "infraction_count",
+}
+
+REQUIRED_COLS = {"name", "address", "city", "theme", "infraction_count"}
 
 
-class DataCleaner:
+def _standardize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Map inconsistent column names to a consistent schema."""
+    rename_map = {c: COLUMN_MAPPING[c] for c in df.columns if c in COLUMN_MAPPING}
+    df = df.rename(columns=rename_map)
+    return df
+
+
+def _basic_cleanup(df: pd.DataFrame) -> pd.DataFrame:
+    """Keep essential columns, clean datatypes, drop duplicates."""
+    # Keep only required columns if present
+    existing = [c for c in REQUIRED_COLS if c in df.columns]
+    df = df[existing].copy()
+
+    # Drop completely empty rows
+    df = df.dropna(how="all")
+
+    # Fill missing values
+    if "infraction_count" in df.columns:
+        df["infraction_count"] = (
+            df["infraction_count"]
+            .fillna(0)
+            .astype(int)
+        )
+
+    # Optional: theme defaults
+    if "theme" in df.columns:
+        df["theme"] = df["theme"].fillna("unknown")
+
+    return df
+
+
+def build_clean_dataset() -> pd.DataFrame:
     """
-    Simple cleaning pipeline.
-
-    Responsibilities:
-      - handle nulls
-      - unify basic formats
-      - encode categorical features (very basic version)
+    Load raw CSVs, normalize schema, ensure required columns exist,
+    clean data, and save cleaned CSV.
     """
+    raw = load_raw_mapaq()
+    df = _standardize_columns(raw)
 
-    def __init__(self, null_strategy: str = "drop") -> None:
-        """
-        :param null_strategy: "drop" or "fill".
-        """
-        if null_strategy not in {"drop", "fill"}:
-            raise ValueError("null_strategy must be 'drop' or 'fill'")
-        self.null_strategy = null_strategy
-        self.stats = CleaningStats()
+    # Check required columns exist
+    missing = REQUIRED_COLS - set(df.columns)
+    if missing:
+        raise ValueError(f"Missing required columns after standardization: {missing}")
 
-    # --------- individual steps ---------
+    df = _basic_cleanup(df)
 
-    def remove_nulls(self, df: pd.DataFrame) -> pd.DataFrame:
-        if self.null_strategy == "drop":
-            return df.dropna(how="any")
+    # Save cleaned CSV
+    df.to_csv(CLEANED_FILE, index=False)
+    return df
 
-        # Simple fill strategy:
-        fill_values = {
-            col: 0 if pd.api.types.is_numeric_dtype(df[col]) else "Unknown"
-            for col in df.columns
-        }
-        return df.fillna(fill_values)
 
-    def unify_formats(self, df: pd.DataFrame) -> pd.DataFrame:
-        # Example: normalize names and regions
-        for col in df.columns:
-            col_lower = col.lower()
-            if "nom" in col_lower or "name" in col_lower:
-                df[col] = df[col].astype(str).str.strip()
-            if "region" in col_lower:
-                df[col] = df[col].astype(str).str.strip().str.title()
-
-        # Example: try parsing any column that looks like a date
-        for col in df.columns:
-            if "date" in col.lower():
-                try:
-                    df[col] = pd.to_datetime(df[col], errors="coerce")
-                except Exception:
-                    # keep original if parsing fails
-                    pass
-        return df
-
-    def encode_categoricals(self, df: pd.DataFrame) -> pd.DataFrame:
-        # Very simple rule: one-hot encode object columns with few unique values
-        cat_cols = [
-            c for c in df.columns if df[c].dtype == "object" and df[c].nunique() < 30
-        ]
-        if not cat_cols:
-            return df
-
-        df_encoded = pd.get_dummies(df, columns=cat_cols, drop_first=True)
-        return df_encoded
-
-    # --------- full pipeline ---------
-
-    def clean_pipeline(self, df: pd.DataFrame) -> pd.DataFrame:
-        self.stats.rows_before, self.stats.cols_before = df.shape
-
-        df = self.remove_nulls(df)
-        df = self.unify_formats(df)
-        df = self.encode_categoricals(df)
-
-        self.stats.rows_after, self.stats.cols_after = df.shape
-        return df
+if __name__ == "__main__":
+    df = build_clean_dataset()
+    print(f"Saved cleaned dataset to {CLEANED_FILE} with {len(df)} rows")
