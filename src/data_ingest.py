@@ -1,35 +1,13 @@
-# TODO: implement data ingestion logic
 from pathlib import Path
-from typing import Optional
-
 import pandas as pd
 
-from .config import MAPAQ_RAW_CSV
+ROOT_DIR = Path(__file__).resolve().parents[1]
+DATA_DIR = ROOT_DIR / "data"
+RAW_DIR = DATA_DIR / "raw"
 
-
-class DataIngestor:
-    """
-    Data ingestion layer for MAPAQ inspections.
-
-    For now it only reads a local CSV. Later we can add:
-      - download from a URL
-      - add caching
-      - validate the full schema
-    """
-
-    def __init__(self, source_path: Optional[Path | str] = None) -> None:
-        self.source_path = Path(source_path) if source_path else MAPAQ_RAW_CSV
-
-    def load(self) -> pd.DataFrame:
-        """
-        Load the inspections CSV as a DataFrame.
-
-        :raises FileNotFoundError: if the file does not exist.
-        """
-        if not self.source_path.exists():
-            raise FileNotFoundError(
-                f"MAPAQ inspections CSV not found at: {self.source_path}"
-            )
-
-        df = pd.read_csv(self.source_path)
-        return df
+def load_raw_mapaq() -> pd.DataFrame:
+    csv_files = list(RAW_DIR.glob("*.csv"))
+    if not csv_files:
+        raise FileNotFoundError(f"No CSV files found in {RAW_DIR}")
+    frames = [pd.read_csv(f) for f in csv_files]
+    return pd.concat(frames, ignore_index=True)

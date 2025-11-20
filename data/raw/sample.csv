@@ -1,0 +1,5 @@
+name,address,city,theme,infraction_count
+Restaurant A,123 Rue A,Montreal,fast_food,2
+Restaurant B,456 Rue B,Quebec,fast_food,0
+Restaurant C,789 Rue C,Montreal,grocery,1
+Restaurant D,000 Rue D,Quebec,grocery,0

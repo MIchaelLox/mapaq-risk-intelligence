@@ -1,31 +1,24 @@
-# TODO: implement data ingestion logic
-from dataclasses import dataclass
-from datetime import date
+from pathlib import Path
+from datetime import datetime
+import json
+from typing import List, Dict
 
+ROOT_DIR = Path(__file__).resolve().parents[1]
+DATA_DIR = ROOT_DIR / "data"
+REG_FILE = DATA_DIR / "regulations.json"
 
-@dataclass
-class RegulationAdapter:
-    """
-    Adjusts risk probabilities based on inspection date and regulation changes.
+def load_regulations() -> List[Dict]:
+   with open(REG_FILE, "r", encoding="utf-8") as f:
+       rules = json.load(f)
+   for r in rules:
+       r["effective_from"] = datetime.fromisoformat(r["effective_from"])
+   rules.sort(key=lambda r: r["effective_from"])
+   return rules
 
-    Simple rule:
-      - before early_year: slightly decrease probability (system was looser)
-      - between early_year and strict_year: no change
-      - after strict_year: slightly increase probability (stricter rules)
-    """
-
-    early_year: int = 2015
-    strict_year: int = 2020
-    early_factor: float = -0.05
-    strict_factor: float = 0.05
-
-    def adjust_probability(self, probability: float, inspection_date: date) -> float:
-        adjusted = probability
-        if inspection_date.year < self.early_year:
-            adjusted += self.early_factor
-        elif inspection_date.year >= self.strict_year:
-            adjusted += self.strict_factor
-
-        # Clip to [0, 1]
-        adjusted = max(0.0, min(1.0, adjusted))
-        return adjusted
+def get_regulation_weight(inspection_date: datetime) -> float:
+   rules = load_regulations()
+   weight = 1.0
+   for r in rules:
+       if inspection_date >= r["effective_from"]:
+           weight = r["weight"]
+   return weight

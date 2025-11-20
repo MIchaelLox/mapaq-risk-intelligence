@@ -1,3 +1,4 @@
-{
-  "rules": []
-}
+[
+  { "name": "baseline", "effective_from": "2010-01-01", "weight": 1.0 },
+  { "name": "post_2018_rules", "effective_from": "2018-01-01", "weight": 1.15 }
+]
