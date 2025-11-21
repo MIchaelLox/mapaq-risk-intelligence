@@ -1,3 +1,30 @@
 {
-  "rules": []
+  "regulations": [
+    {
+      "id": "REG-2020-001",
+      "name": "Règlement sur les aliments",
+      "effective_date": "2020-01-01",
+      "description": "Mise à jour des normes d'hygiène alimentaire",
+      "impact_weight": 1.2
+    },
+    {
+      "id": "REG-2021-003",
+      "name": "Normes de température",
+      "effective_date": "2021-06-15",
+      "description": "Nouvelles exigences pour le stockage des aliments",
+      "impact_weight": 1.1
+    },
+    {
+      "id": "REG-2023-005",
+      "name": "Formation du personnel",
+      "effective_date": "2023-03-01",
+      "description": "Obligation de formation en salubrité alimentaire",
+      "impact_weight": 1.15
+    }
+  ],
+  "metadata": {
+    "last_updated": "2024-01-15",
+    "source": "MAPAQ",
+    "version": "1.0"
+  }
 }
