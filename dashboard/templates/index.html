@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAPAQ Risk Intelligence - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-utensils text-2xl"></i>
+                    <h1 class="text-2xl font-bold">MAPAQ Risk Intelligence</h1>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="/" class="hover:text-blue-200 transition">Accueil</a>
+                    <a href="/dashboard" class="hover:text-blue-200 transition">Dashboard</a>
+                    <a href="/predict-form" class="hover:text-blue-200 transition">Prédiction</a>
+                    <a href="/about" class="hover:text-blue-200 transition">À propos</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-r from-blue-500 to-blue-700 text-white py-20">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-5xl font-bold mb-4">🧬 Prédiction de Risque Sanitaire</h2>
+            <p class="text-xl mb-8">Système intelligent d'analyse des risques pour les restaurants du Québec</p>
+            <div class="flex justify-center space-x-4">
+                <a href="/predict-form" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition">
+                    <i class="fas fa-calculator mr-2"></i>Faire une Prédiction
+                </a>
+                <a href="/dashboard" class="bg-blue-800 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-900 transition">
+                    <i class="fas fa-chart-line mr-2"></i>Voir le Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="container mx-auto px-6 py-16">
+        <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">Fonctionnalités Principales</h3>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition">
+                <div class="text-blue-600 text-4xl mb-4">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h4 class="text-xl font-bold mb-3 text-gray-800">Probabilités Conditionnelles</h4>
+                <p class="text-gray-600">Moteur bayésien v2 pour des prédictions précises basées sur plusieurs facteurs.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition">
+                <div class="text-green-600 text-4xl mb-4">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <h4 class="text-xl font-bold mb-3 text-gray-800">Visualisations Interactives</h4>
+                <p class="text-gray-600">Graphiques dynamiques avec Plotly pour analyser les tendances et distributions.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="bg-white p-8 rounded-lg shadow-lg hover:shadow-xl transition">
+                <div class="text-purple-600 text-4xl mb-4">
+                    <i class="fas fa-balance-scale"></i>
+                </div>
+                <h4 class="text-xl font-bold mb-3 text-gray-800">Ajustements Réglementaires</h4>
+                <p class="text-gray-600">Prise en compte des changements de réglementation MAPAQ dans le temps.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Section -->
+    <div class="bg-gray-100 py-16">
+        <div class="container mx-auto px-6">
+            <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">Statistiques Rapides</h3>
+            
+            <div class="grid md:grid-cols-4 gap-6" id="quick-stats">
+                <div class="bg-white p-6 rounded-lg shadow text-center">
+                    <div class="text-4xl font-bold text-blue-600 mb-2">1,250</div>
+                    <div class="text-gray-600">Restaurants Analysés</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow text-center">
+                    <div class="text-4xl font-bold text-green-600 mb-2">60%</div>
+                    <div class="text-gray-600">Risque Faible</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow text-center">
+                    <div class="text-4xl font-bold text-orange-600 mb-2">30%</div>
+                    <div class="text-gray-600">Risque Moyen</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow text-center">
+                    <div class="text-4xl font-bold text-red-600 mb-2">10%</div>
+                    <div class="text-gray-600">Risque Élevé</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="container mx-auto px-6 py-16">
+        <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">Comment Ça Marche ?</h3>
+        
+        <div class="max-w-4xl mx-auto">
+            <div class="flex items-start mb-8">
+                <div class="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl mr-4 flex-shrink-0">1</div>
+                <div>
+                    <h4 class="text-xl font-bold mb-2 text-gray-800">Collecte des Données</h4>
+                    <p class="text-gray-600">Ingestion des données d'inspection MAPAQ (nom, adresse, type de cuisine, infractions, etc.)</p>
+                </div>
+            </div>
+
+            <div class="flex items-start mb-8">
+                <div class="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl mr-4 flex-shrink-0">2</div>
+                <div>
+                    <h4 class="text-xl font-bold mb-2 text-gray-800">Nettoyage & Normalisation</h4>
+                    <p class="text-gray-600">Traitement des données : suppression des doublons, normalisation des formats, gestion des valeurs manquantes.</p>
+                </div>
+            </div>
+
+            <div class="flex items-start mb-8">
+                <div class="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl mr-4 flex-shrink-0">3</div>
+                <div>
+                    <h4 class="text-xl font-bold mb-2 text-gray-800">Calcul des Probabilités</h4>
+                    <p class="text-gray-600">Moteur bayésien analyse les facteurs (cuisine, employés, infractions, taille, région) pour calculer le risque.</p>
+                </div>
+            </div>
+
+            <div class="flex items-start">
+                <div class="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl mr-4 flex-shrink-0">4</div>
+                <div>
+                    <h4 class="text-xl font-bold mb-2 text-gray-800">Prédiction & Visualisation</h4>
+                    <p class="text-gray-600">Résultat final : niveau de risque (Low/Medium/High) avec probabilités et visualisations interactives.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p class="mb-2">© 2025 MAPAQ Risk Intelligence</p>
+            <p class="text-gray-400">Développé par <strong>Grace Mandiangu</strong></p>
+            <div class="mt-4 flex justify-center space-x-6">
+                <a href="#" class="hover:text-blue-400 transition"><i class="fab fa-github text-2xl"></i></a>
+                <a href="#" class="hover:text-blue-400 transition"><i class="fab fa-linkedin text-2xl"></i></a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

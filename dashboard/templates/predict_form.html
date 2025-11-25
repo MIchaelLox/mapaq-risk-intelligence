@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prédiction de Risque - MAPAQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-utensils text-2xl"></i>
+                    <h1 class="text-2xl font-bold">MAPAQ Risk Intelligence</h1>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="/" class="hover:text-blue-200 transition">Accueil</a>
+                    <a href="/dashboard" class="hover:text-blue-200 transition">Dashboard</a>
+                    <a href="/predict-form" class="hover:text-blue-200 transition font-bold">Prédiction</a>
+                    <a href="/about" class="hover:text-blue-200 transition">À propos</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-12">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-8 text-gray-800">
+                <i class="fas fa-calculator text-blue-600 mr-3"></i>Prédiction de Risque Sanitaire
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Formulaire -->
+                <div class="bg-white rounded-lg shadow-lg p-8">
+                    <h3 class="text-2xl font-bold mb-6 text-gray-800">Informations du Restaurant</h3>
+                    
+                    <form id="prediction-form">
+                        <!-- Type de cuisine -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold mb-2">
+                                <i class="fas fa-utensils text-blue-600 mr-2"></i>Type de Cuisine
+                            </label>
+                            <select id="cuisine_type" name="cuisine_type" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Sélectionnez...</option>
+                                <option value="Sushi">Sushi</option>
+                                <option value="Fast Food">Fast Food</option>
+                                <option value="Fine Dining">Fine Dining</option>
+                                <option value="Bakery">Boulangerie</option>
+                                <option value="BBQ">BBQ</option>
+                                <option value="Other">Autre</option>
+                            </select>
+                        </div>
+
+                        <!-- Nombre d'employés -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold mb-2">
+                                <i class="fas fa-users text-blue-600 mr-2"></i>Nombre d'Employés
+                            </label>
+                            <input type="number" id="staff_count" name="staff_count" min="1" max="100" value="10" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <!-- Historique d'infractions -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold mb-2">
+                                <i class="fas fa-exclamation-triangle text-orange-600 mr-2"></i>Infractions Passées
+                            </label>
+                            <input type="number" id="infractions_history" name="infractions_history" min="0" max="10" value="0" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <!-- Taille de la cuisine -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold mb-2">
+                                <i class="fas fa-ruler-combined text-blue-600 mr-2"></i>Taille de la Cuisine (m²)
+                            </label>
+                            <input type="number" id="kitchen_size" name="kitchen_size" min="10" max="500" step="0.1" value="35" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <!-- Région -->
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-semibold mb-2">
+                                <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>Région
+                            </label>
+                            <select id="region" name="region" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Sélectionnez...</option>
+                                <option value="Montreal">Montréal</option>
+                                <option value="Quebec">Québec</option>
+                                <option value="Laval">Laval</option>
+                                <option value="Gatineau">Gatineau</option>
+                                <option value="Other">Autre</option>
+                            </select>
+                        </div>
+
+                        <!-- Bouton de soumission -->
+                        <button type="submit" id="predict-btn"
+                                class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                            <i class="fas fa-magic mr-2"></i>Calculer le Risque
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Résultats -->
+                <div class="bg-white rounded-lg shadow-lg p-8">
+                    <h3 class="text-2xl font-bold mb-6 text-gray-800">Résultat de la Prédiction</h3>
+                    
+                    <div id="result-container" class="hidden">
+                        <!-- Niveau de risque -->
+                        <div id="risk-badge" class="text-center mb-6 p-6 rounded-lg">
+                            <div class="text-5xl font-bold mb-2" id="risk-level-text">-</div>
+                            <div class="text-xl" id="confidence-text">-</div>
+                        </div>
+
+                        <!-- Graphique des probabilités -->
+                        <div id="probability-chart" class="mb-6"></div>
+
+                        <!-- Détails -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold mb-3 text-gray-700">Probabilités Détaillées</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span class="text-green-600 font-semibold">Risque Faible:</span>
+                                    <span id="prob-low" class="font-bold">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-orange-600 font-semibold">Risque Moyen:</span>
+                                    <span id="prob-medium" class="font-bold">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-red-600 font-semibold">Risque Élevé:</span>
+                                    <span id="prob-high" class="font-bold">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="loading-container" class="hidden text-center py-12">
+                        <i class="fas fa-spinner fa-spin text-5xl text-blue-600 mb-4"></i>
+                        <p class="text-gray-600">Calcul en cours...</p>
+                    </div>
+
+                    <div id="initial-message" class="text-center py-12 text-gray-400">
+                        <i class="fas fa-chart-line text-6xl mb-4"></i>
+                        <p>Remplissez le formulaire pour obtenir une prédiction</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('prediction-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Afficher le loading
+            document.getElementById('initial-message').classList.add('hidden');
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('loading-container').classList.remove('hidden');
+            
+            // Récupérer les données du formulaire
+            const formData = {
+                cuisine_type: document.getElementById('cuisine_type').value,
+                staff_count: parseInt(document.getElementById('staff_count').value),
+                infractions_history: parseInt(document.getElementById('infractions_history').value),
+                kitchen_size: parseFloat(document.getElementById('kitchen_size').value),
+                region: document.getElementById('region').value
+            };
+            
+            try {
+                // Appel API
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Masquer le loading
+                    document.getElementById('loading-container').classList.add('hidden');
+                    document.getElementById('result-container').classList.remove('hidden');
+                    
+                    // Afficher le niveau de risque
+                    const riskBadge = document.getElementById('risk-badge');
+                    const riskLevel = data.prediction.risk_level;
+                    const confidence = data.prediction.confidence;
+                    
+                    // Couleur selon le risque
+                    if (riskLevel === 'Low') {
+                        riskBadge.style.backgroundColor = '#d1fae5';
+                        riskBadge.style.color = '#065f46';
+                    } else if (riskLevel === 'Medium') {
+                        riskBadge.style.backgroundColor = '#fed7aa';
+                        riskBadge.style.color = '#92400e';
+                    } else {
+                        riskBadge.style.backgroundColor = '#fee2e2';
+                        riskBadge.style.color = '#991b1b';
+                    }
+                    
+                    document.getElementById('risk-level-text').textContent = riskLevel === 'Low' ? 'Risque Faible' : 
+                                                                             riskLevel === 'Medium' ? 'Risque Moyen' : 'Risque Élevé';
+                    document.getElementById('confidence-text').textContent = `Confiance: ${confidence}%`;
+                    
+                    // Afficher les probabilités
+                    document.getElementById('prob-low').textContent = `${data.prediction.probabilities.Low}%`;
+                    document.getElementById('prob-medium').textContent = `${data.prediction.probabilities.Medium}%`;
+                    document.getElementById('prob-high').textContent = `${data.prediction.probabilities.High}%`;
+                    
+                    // Créer le graphique
+                    const chartData = [{
+                        x: ['Faible', 'Moyen', 'Élevé'],
+                        y: [data.prediction.probabilities.Low, data.prediction.probabilities.Medium, data.prediction.probabilities.High],
+                        type: 'bar',
+                        marker: {
+                            color: ['#10b981', '#f59e0b', '#ef4444']
+                        }
+                    }];
+                    
+                    const layout = {
+                        title: 'Distribution des Probabilités',
+                        yaxis: { title: 'Probabilité (%)' },
+                        height: 300,
+                        margin: { t: 40, b: 40, l: 50, r: 20 }
+                    };
+                    
+                    Plotly.newPlot('probability-chart', chartData, layout, {responsive: true});
+                    
+                } else {
+                    alert('Erreur: ' + data.error);
+                    document.getElementById('loading-container').classList.add('hidden');
+                    document.getElementById('initial-message').classList.remove('hidden');
+                }
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la prédiction');
+                document.getElementById('loading-container').classList.add('hidden');
+                document.getElementById('initial-message').classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
