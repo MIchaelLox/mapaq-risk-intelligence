@@ -52,7 +52,8 @@ def predict_risk():
         "staff_count": 10,
         "infractions_history": 2,
         "kitchen_size": 35.0,
-        "region": "Montreal"
+        "region": "Montreal",
+        "inspection_date": "2023-06-15"  // Optionnel, format: YYYY-MM-DD
     }
     
     Returns:
@@ -85,6 +86,17 @@ def predict_risk():
         kitchen_size = float(data['kitchen_size'])
         region = data['region']
         
+        # Paramètre optionnel: date d'inspection
+        inspection_date = None
+        if 'inspection_date' in data:
+            try:
+                inspection_date = datetime.strptime(data['inspection_date'], '%Y-%m-%d')
+            except ValueError:
+                return jsonify({
+                    'error': 'Invalid inspection_date format',
+                    'message': 'Expected format: YYYY-MM-DD'
+                }), 400
+        
         # Validation des valeurs
         if staff_count < 0:
             return jsonify({'error': 'staff_count must be positive'}), 400
@@ -103,7 +115,8 @@ def predict_risk():
             staff_count=staff_count,
             infractions_history=infractions_history,
             kitchen_size=kitchen_size,
-            region=region
+            region=region,
+            inspection_date=inspection_date
         )
         
         # Obtenir le niveau de risque prédit
@@ -112,7 +125,8 @@ def predict_risk():
             staff_count=staff_count,
             infractions_history=infractions_history,
             kitchen_size=kitchen_size,
-            region=region
+            region=region,
+            inspection_date=inspection_date
         )
         
         # Construire la réponse
@@ -131,8 +145,10 @@ def predict_risk():
                 'staff_count': staff_count,
                 'infractions_history': infractions_history,
                 'kitchen_size': kitchen_size,
-                'region': region
+                'region': region,
+                'inspection_date': inspection_date.isoformat() if inspection_date else None
             },
+            'temporal_adjustment_applied': prediction_engine.temporal_adjustment_enabled,
             'timestamp': datetime.now().isoformat()
         }
         
@@ -192,12 +208,21 @@ def predict_batch():
         
         for idx, restaurant in enumerate(restaurants):
             try:
+                # Extraire la date d'inspection si présente
+                inspection_date = None
+                if 'inspection_date' in restaurant:
+                    try:
+                        inspection_date = datetime.strptime(restaurant['inspection_date'], '%Y-%m-%d')
+                    except ValueError:
+                        pass
+                
                 risk_level, confidence = prediction_engine.predict_risk_level(
                     cuisine_type=restaurant['cuisine_type'],
                     staff_count=int(restaurant['staff_count']),
                     infractions_history=int(restaurant['infractions_history']),
                     kitchen_size=float(restaurant['kitchen_size']),
-                    region=restaurant['region']
+                    region=restaurant['region'],
+                    inspection_date=inspection_date
                 )
                 
                 predictions.append({

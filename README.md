@@ -124,6 +124,15 @@ Python 3.10, pandas, scikit-learn, Flask/FastAPI, Plotly, Leaflet, pytest.
 - GET `/health` endpoint for API health checks
 - Input validation and error handling
 - JSON response format with probabilities and confidence scores
+- Support for temporal regulation adjustments via `inspection_date` parameter
+
+**6. Temporal Regulation Weighting** (`src/regulation_adapter.py`) - Grace Mandiangu
+- Automatic temporal adjustment of risk scores based on regulatory changes
+- Loads regulation metadata from `data/regulations.json`
+- Applies time-based impact weights to risk probabilities
+- Calculates cumulative regulatory impact for specific inspection dates
+- Integration with probability engine for seamless temporal adjustments
+- Timeline tracking and regulation history management
 
 ### 📁 Current Project Structure
 ```
@@ -131,12 +140,13 @@ mapaq-risk-intelligence/
 ├── data/
 │   ├── raw/                    # Raw data directory
 │   ├── cleaned/                # Cleaned data directory
-│   └── regulations.json        # ✅ Regulations config (Grace Mandiangu)
+│   └── regulations.json        # Regulations config (Grace Mandiangu)
 ├── src/
-│   ├── data_ingest.py          # ✅ Data ingestion module (Grace Mandiangu)
-│   ├── data_cleaner.py         # ✅ Data cleaning module (Grace Mandiangu)
-│   ├── probability_model.py    # ✅ Probability engine v2 (Grace Mandiangu)
-│   └── api.py                  # ✅ REST API /predict (Grace Mandiangu)
+│   ├── data_ingest.py          # Data ingestion module (Grace Mandiangu)
+│   ├── data_cleaner.py         # Data cleaning module (Grace Mandiangu)
+│   ├── probability_model.py    # Probability engine v2 (Grace Mandiangu)
+│   ├── regulation_adapter.py   # Temporal regulation weighting (Grace Mandiangu)
+│   └── api.py                  # REST API /predict (Grace Mandiangu)
 ├── dashboard/
 │   └── templates/
 └── tests/
@@ -145,11 +155,77 @@ mapaq-risk-intelligence/
 ### 🔄 Next Steps
 - Implement `theme_classifier.py` for cuisine type classification
 - Develop `address_geocoder.py` for address normalization and geocoding
-- Create `regulation_adapter.py` for temporal regulation adjustments
 - Build interactive dashboard with Flask/React
-- Add automated tests (pytest)
+- Expand automated test coverage (pytest)
+- Add data visualization components
+
+---
+
+## Usage Examples
+
+### Using Temporal Regulation Weighting
+
+```python
+from datetime import datetime
+from src.probability_model import ConditionalProbabilityEngine
+
+# Initialize engine with temporal adjustments enabled
+engine = ConditionalProbabilityEngine(enable_temporal_adjustment=True)
+
+# Predict risk for a specific inspection date
+risk_level, confidence = engine.predict_risk_level(
+    cuisine_type="Sushi",
+    staff_count=10,
+    infractions_history=2,
+    kitchen_size=35.0,
+    region="Montreal",
+    inspection_date=datetime(2023, 6, 15)
+)
+
+print(f"Risk Level: {risk_level} (Confidence: {confidence:.2%})")
+```
+
+### API Request with Inspection Date
+
+```bash
+curl -X POST http://localhost:5000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cuisine_type": "Sushi",
+    "staff_count": 10,
+    "infractions_history": 2,
+    "kitchen_size": 35.0,
+    "region": "Montreal",
+    "inspection_date": "2023-06-15"
+  }'
+```
+
+### Managing Regulations
+
+```python
+from src.regulation_adapter import RegulationAdapter
+
+adapter = RegulationAdapter()
+
+# View regulation timeline
+timeline = adapter.get_regulation_timeline()
+for reg in timeline:
+    print(f"{reg['effective_date']}: {reg['name']} (impact: {reg['impact_weight']})")
+
+# Add new regulation
+adapter.add_regulation(
+    regulation_id="REG-2024-001",
+    name="New Food Safety Standard",
+    effective_date="2024-01-01",
+    description="Enhanced hygiene requirements",
+    impact_weight=1.3
+)
+
+# Save changes
+adapter.save_regulations()
+```
 
 ---
 
 **Author:** Grace Mandiangu  
-**Last Updated:** November 24, 2025
+**Last Updated:** November 25, 2025

@@ -11,7 +11,15 @@ Date: November 21, 2025
 import numpy as np
 import pandas as pd
 from typing import Dict, Tuple, Optional
+from datetime import datetime
 import logging
+
+try:
+    from regulation_adapter import RegulationAdapter
+    REGULATION_ADAPTER_AVAILABLE = True
+except ImportError:
+    REGULATION_ADAPTER_AVAILABLE = False
+    logging.warning("RegulationAdapter non disponible, ajustements temporels désactivés")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -24,8 +32,12 @@ class ConditionalProbabilityEngine:
     Utilise le théorème de Bayes pour calculer P(Risque | Features).
     """
     
-    def __init__(self):
-        """Initialise le moteur de probabilités."""
+    def __init__(self, enable_temporal_adjustment: bool = True):
+        """Initialise le moteur de probabilités.
+        
+        Args:
+            enable_temporal_adjustment: Active les ajustements temporels basés sur les réglementations
+        """
         
         # Probabilités a priori (baseline)
         self.prior_risk = {
@@ -59,6 +71,18 @@ class ConditionalProbabilityEngine:
             4: 0.70,   # 4+ infractions
         }
         
+        # Initialiser l'adaptateur de réglementations
+        self.regulation_adapter = None
+        self.temporal_adjustment_enabled = False
+        
+        if enable_temporal_adjustment and REGULATION_ADAPTER_AVAILABLE:
+            try:
+                self.regulation_adapter = RegulationAdapter()
+                self.temporal_adjustment_enabled = True
+                logger.info("Ajustements temporels activés")
+            except Exception as e:
+                logger.warning(f"Impossible d'initialiser RegulationAdapter: {str(e)}")
+        
         logger.info("ConditionalProbabilityEngine v2 initialisé")
     
     def calculate_risk_probability(
@@ -67,7 +91,8 @@ class ConditionalProbabilityEngine:
         staff_count: int,
         infractions_history: int,
         kitchen_size: float,
-        region: str
+        region: str,
+        inspection_date: Optional[datetime] = None
     ) -> Dict[str, float]:
         """
         Calcule les probabilités de risque conditionnelles.
@@ -78,10 +103,13 @@ class ConditionalProbabilityEngine:
             infractions_history: Nombre d'infractions passées
             kitchen_size: Taille de la cuisine en m²
             region: Région géographique
+            inspection_date: Date de l'inspection (optionnel, défaut: aujourd'hui)
             
         Returns:
             Dictionnaire avec les probabilités pour chaque niveau de risque
         """
+        if inspection_date is None:
+            inspection_date = datetime.now()
         logger.info(f"Calcul de probabilité pour: {cuisine_type}, {staff_count} employés")
         
         # 1. Probabilité basée sur le type de cuisine
@@ -115,7 +143,15 @@ class ConditionalProbabilityEngine:
         total = sum(final_probs.values())
         final_probs = {k: v/total for k, v in final_probs.items()}
         
-        logger.info(f"Probabilités calculées: {final_probs}")
+        # Appliquer les ajustements temporels si activés
+        if self.temporal_adjustment_enabled and self.regulation_adapter:
+            final_probs = self.regulation_adapter.adjust_risk_probabilities(
+                final_probs,
+                inspection_date
+            )
+            logger.info(f"Probabilités après ajustement temporel: {final_probs}")
+        else:
+            logger.info(f"Probabilités calculées: {final_probs}")
         
         return final_probs
     
@@ -125,10 +161,19 @@ class ConditionalProbabilityEngine:
         staff_count: int,
         infractions_history: int,
         kitchen_size: float,
-        region: str
+        region: str,
+        inspection_date: Optional[datetime] = None
     ) -> Tuple[str, float]:
         """
         Prédit le niveau de risque le plus probable.
+        
+        Args:
+            cuisine_type: Type de cuisine du restaurant
+            staff_count: Nombre d'employés
+            infractions_history: Nombre d'infractions passées
+            kitchen_size: Taille de la cuisine en m²
+            region: Région géographique
+            inspection_date: Date de l'inspection (optionnel, défaut: aujourd'hui)
         
         Returns:
             Tuple (niveau_de_risque, probabilité)
@@ -138,7 +183,8 @@ class ConditionalProbabilityEngine:
             staff_count,
             infractions_history,
             kitchen_size,
-            region
+            region,
+            inspection_date
         )
         
         # Retourner le niveau avec la probabilité maximale
