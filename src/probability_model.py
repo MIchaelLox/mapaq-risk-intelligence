@@ -1,11 +1,20 @@
 """
 Module de calcul de probabilités conditionnelles pour la prédiction de risque sanitaire.
 
-Conditional Probability Engine v2 - Utilise les probabilités bayésiennes pour
+Conditional Probability Engine v2 - Moteur avancé de probabilités bayésiennes pour
 calculer le risque sanitaire des restaurants basé sur plusieurs facteurs.
 
+Fonctionnalités v2:
+- Calcul de probabilités conditionnelles P(A|B) à partir de données historiques
+- Théorème de Bayes pour inférence probabiliste
+- Probabilités jointes pour événements multiples
+- Apprentissage automatique des probabilités par type de cuisine
+- Matrice de probabilités conditionnelles
+- Ajustements temporels basés sur les réglementations
+- Prédiction multi-facteurs (cuisine, staff, infractions, taille, région)
+
 Author: Grace Mandiangu
-Date: November 21, 2025
+Date: November 27, 2025
 """
 
 import numpy as np
@@ -29,7 +38,17 @@ class ConditionalProbabilityEngine:
     """
     Moteur de probabilités conditionnelles v2 pour la prédiction de risque.
     
-    Utilise le théorème de Bayes pour calculer P(Risque | Features).
+    Utilise le théorème de Bayes et l'inférence probabiliste pour calculer P(Risque | Features).
+    
+    Méthodes principales:
+    - calculate_risk_probability: Calcule les probabilités de risque pour un restaurant
+    - predict_risk_level: Prédit le niveau de risque le plus probable
+    - calculate_conditional_probability: Calcule P(A|B) à partir de données
+    - calculate_bayes_theorem: Applique le théorème de Bayes
+    - calculate_joint_probability: Calcule P(A ∩ B ∩ C...)
+    - learn_cuisine_probabilities: Apprend les probabilités à partir de données
+    - get_probability_matrix: Génère une matrice de probabilités conditionnelles
+    - update_priors: Met à jour les probabilités a priori
     """
     
     def __init__(self, enable_temporal_adjustment: bool = True):
@@ -257,22 +276,50 @@ class ConditionalProbabilityEngine:
         self,
         event_a: str,
         event_b: str,
-        data: pd.DataFrame
+        data: pd.DataFrame,
+        column_a: str = 'risk_level',
+        column_b: str = 'cuisine_type'
     ) -> float:
         """
-        Calcule P(A|B) = P(A ∩ B) / P(B).
+        Calcule P(A|B) = P(A ∩ B) / P(B) à partir de données historiques.
         
         Args:
-            event_a: Événement A (ex: 'High Risk')
+            event_a: Événement A (ex: 'High')
             event_b: Événement B (ex: 'Sushi')
             data: DataFrame contenant les données historiques
+            column_a: Nom de la colonne pour l'événement A
+            column_b: Nom de la colonne pour l'événement B
             
         Returns:
             Probabilité conditionnelle P(A|B)
         """
-        # Cette méthode peut être étendue pour calculer des probabilités
-        # conditionnelles à partir de données historiques
-        pass
+        if data.empty:
+            logger.warning("DataFrame vide, impossible de calculer P(A|B)")
+            return 0.0
+        
+        if column_a not in data.columns or column_b not in data.columns:
+            logger.error(f"Colonnes manquantes: {column_a} ou {column_b}")
+            return 0.0
+        
+        # P(B) - Probabilité de l'événement B
+        count_b = len(data[data[column_b] == event_b])
+        if count_b == 0:
+            logger.warning(f"Aucune occurrence de {event_b} dans {column_b}")
+            return 0.0
+        
+        prob_b = count_b / len(data)
+        
+        # P(A ∩ B) - Probabilité de A et B simultanément
+        count_a_and_b = len(data[(data[column_a] == event_a) & (data[column_b] == event_b)])
+        prob_a_and_b = count_a_and_b / len(data)
+        
+        # P(A|B) = P(A ∩ B) / P(B)
+        prob_a_given_b = prob_a_and_b / prob_b
+        
+        logger.info(f"P({event_a}|{event_b}) = {prob_a_given_b:.4f}")
+        logger.debug(f"P({event_b}) = {prob_b:.4f}, P({event_a} ∩ {event_b}) = {prob_a_and_b:.4f}")
+        
+        return prob_a_given_b
     
     def update_priors(self, new_data: pd.DataFrame) -> None:
         """
@@ -289,6 +336,135 @@ class ConditionalProbabilityEngine:
             self.prior_risk['High'] = len(new_data[new_data['risk_level'] == 'High']) / total
             
             logger.info(f"Probabilités a priori mises à jour: {self.prior_risk}")
+    
+    def learn_cuisine_probabilities(self, data: pd.DataFrame) -> None:
+        """
+        Apprend les probabilités conditionnelles par type de cuisine à partir de données historiques.
+        
+        Args:
+            data: DataFrame avec colonnes 'cuisine_type' et 'risk_level'
+        """
+        if 'cuisine_type' not in data.columns or 'risk_level' not in data.columns:
+            logger.error("Colonnes 'cuisine_type' et 'risk_level' requises")
+            return
+        
+        # Grouper par type de cuisine
+        cuisine_types = data['cuisine_type'].unique()
+        
+        for cuisine in cuisine_types:
+            cuisine_data = data[data['cuisine_type'] == cuisine]
+            total = len(cuisine_data)
+            
+            if total > 0:
+                self.cuisine_risk_probs[cuisine] = {
+                    'Low': len(cuisine_data[cuisine_data['risk_level'] == 'Low']) / total,
+                    'Medium': len(cuisine_data[cuisine_data['risk_level'] == 'Medium']) / total,
+                    'High': len(cuisine_data[cuisine_data['risk_level'] == 'High']) / total
+                }
+                logger.info(f"Probabilités apprises pour {cuisine}: {self.cuisine_risk_probs[cuisine]}")
+    
+    def calculate_joint_probability(
+        self,
+        events: Dict[str, str],
+        data: pd.DataFrame
+    ) -> float:
+        """
+        Calcule la probabilité jointe P(A ∩ B ∩ C ...) pour plusieurs événements.
+        
+        Args:
+            events: Dictionnaire {colonne: valeur} des événements
+            data: DataFrame contenant les données historiques
+            
+        Returns:
+            Probabilité jointe des événements
+        """
+        if data.empty:
+            logger.warning("DataFrame vide")
+            return 0.0
+        
+        # Filtrer les données pour tous les événements
+        filtered_data = data.copy()
+        for column, value in events.items():
+            if column not in data.columns:
+                logger.error(f"Colonne {column} manquante")
+                return 0.0
+            filtered_data = filtered_data[filtered_data[column] == value]
+        
+        # Probabilité jointe
+        joint_prob = len(filtered_data) / len(data)
+        
+        logger.info(f"P({events}) = {joint_prob:.4f}")
+        return joint_prob
+    
+    def calculate_bayes_theorem(
+        self,
+        hypothesis: str,
+        evidence: str,
+        data: pd.DataFrame,
+        hypothesis_col: str = 'risk_level',
+        evidence_col: str = 'cuisine_type'
+    ) -> float:
+        """
+        Applique le théorème de Bayes: P(H|E) = P(E|H) * P(H) / P(E).
+        
+        Args:
+            hypothesis: Hypothèse (ex: 'High')
+            evidence: Évidence observée (ex: 'Sushi')
+            data: DataFrame avec données historiques
+            hypothesis_col: Colonne de l'hypothèse
+            evidence_col: Colonne de l'évidence
+            
+        Returns:
+            Probabilité a posteriori P(H|E)
+        """
+        # P(H) - Probabilité a priori de l'hypothèse
+        count_h = len(data[data[hypothesis_col] == hypothesis])
+        prob_h = count_h / len(data) if len(data) > 0 else 0.0
+        
+        # P(E) - Probabilité de l'évidence
+        count_e = len(data[data[evidence_col] == evidence])
+        prob_e = count_e / len(data) if len(data) > 0 else 0.0
+        
+        if prob_e == 0:
+            logger.warning(f"P({evidence}) = 0, impossible de calculer P(H|E)")
+            return 0.0
+        
+        # P(E|H) - Vraisemblance
+        data_h = data[data[hypothesis_col] == hypothesis]
+        count_e_given_h = len(data_h[data_h[evidence_col] == evidence])
+        prob_e_given_h = count_e_given_h / count_h if count_h > 0 else 0.0
+        
+        # Théorème de Bayes: P(H|E) = P(E|H) * P(H) / P(E)
+        prob_h_given_e = (prob_e_given_h * prob_h) / prob_e
+        
+        logger.info(f"Théorème de Bayes: P({hypothesis}|{evidence}) = {prob_h_given_e:.4f}")
+        logger.debug(f"P(H)={prob_h:.4f}, P(E)={prob_e:.4f}, P(E|H)={prob_e_given_h:.4f}")
+        
+        return prob_h_given_e
+    
+    def get_probability_matrix(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Génère une matrice de probabilités conditionnelles P(Risk|Cuisine).
+        
+        Args:
+            data: DataFrame avec colonnes 'cuisine_type' et 'risk_level'
+            
+        Returns:
+            DataFrame avec matrice de probabilités
+        """
+        if 'cuisine_type' not in data.columns or 'risk_level' not in data.columns:
+            logger.error("Colonnes requises manquantes")
+            return pd.DataFrame()
+        
+        # Créer une table de contingence
+        contingency_table = pd.crosstab(
+            data['cuisine_type'],
+            data['risk_level'],
+            normalize='index'
+        )
+        
+        logger.info("Matrice de probabilités conditionnelles générée")
+        return contingency_table
 
 
 if __name__ == "__main__":

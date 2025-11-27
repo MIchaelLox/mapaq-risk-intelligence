@@ -111,11 +111,16 @@ Python 3.10, pandas, scikit-learn, Flask/FastAPI, Plotly, Leaflet, pytest.
 - Cleaning report generation
 
 **4. Conditional Probability Engine v2** (`src/probability_model.py`) - Grace Mandiangu
-- Bayesian probability calculations for risk prediction
+- Advanced Bayesian probability calculations for risk prediction
 - Multi-factor risk assessment (cuisine, staff, infractions, kitchen size, region)
 - Three-level risk categorization (Low/Medium/High)
-- Conditional probability adjustments based on restaurant features
+- Conditional probability P(A|B) calculations from historical data
+- Bayes theorem implementation for probabilistic inference
+- Joint probability calculations P(A ∩ B ∩ C...) for multiple events
+- Automatic learning of cuisine-specific risk probabilities from data
+- Probability matrix generation for risk analysis
 - Prior probability updates with new data
+- Integration with temporal regulation adjustments
 
 **5. REST API with /predict Endpoint** (`src/api.py`) - Grace Mandiangu
 - Flask-based REST API implementation
@@ -195,7 +200,7 @@ curl -X POST http://localhost:5000/predict \
     "staff_count": 10,
     "infractions_history": 2,
     "kitchen_size": 35.0,
-    "region": "Montreal",
+    "region": "Quebec",
     "inspection_date": "2023-06-15"
   }'
 ```
@@ -225,7 +230,60 @@ adapter.add_regulation(
 adapter.save_regulations()
 ```
 
+### Using Advanced Probability Features (v2) - Grace Mandiangu
+
+```python
+import pandas as pd
+from src.probability_model import ConditionalProbabilityEngine
+
+# Initialize engine
+engine = ConditionalProbabilityEngine()
+
+# Sample historical data
+historical_data = pd.DataFrame({
+    'cuisine_type': ['Sushi', 'Sushi', 'Italian', 'Fast Food', 'Sushi'],
+    'risk_level': ['High', 'Medium', 'Low', 'Medium', 'High'],
+    'region': ['Montreal', 'Montreal', 'Quebec', 'Laval', 'Montreal']
+})
+
+# 1. Calculate conditional probability P(High Risk | Sushi)
+prob = engine.calculate_conditional_probability(
+    event_a='High',
+    event_b='Sushi',
+    data=historical_data,
+    column_a='risk_level',
+    column_b='cuisine_type'
+)
+print(f"P(High Risk | Sushi) = {prob:.2%}")
+
+# 2. Apply Bayes theorem
+posterior = engine.calculate_bayes_theorem(
+    hypothesis='High',
+    evidence='Sushi',
+    data=historical_data
+)
+print(f"Posterior probability: {posterior:.2%}")
+
+# 3. Calculate joint probability P(Sushi ∩ High Risk ∩ Montreal)
+joint_prob = engine.calculate_joint_probability(
+    events={'cuisine_type': 'Sushi', 'risk_level': 'High', 'region': 'Montreal'},
+    data=historical_data
+)
+print(f"Joint probability: {joint_prob:.2%}")
+
+# 4. Learn probabilities from data
+engine.learn_cuisine_probabilities(historical_data)
+
+# 5. Generate probability matrix
+prob_matrix = engine.get_probability_matrix(historical_data)
+print("\nProbability Matrix:")
+print(prob_matrix)
+
+# 6. Update priors with new data
+engine.update_priors(historical_data)
+```
+
 ---
 
 **Author:** Grace Mandiangu  
-**Last Updated:** November 25, 2025
+**Last Updated:** November 27, 2025
