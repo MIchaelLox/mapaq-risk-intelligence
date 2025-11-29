@@ -2,10 +2,16 @@
 Application Dashboard Interactif pour MAPAQ Risk Intelligence.
 
 Dashboard Flask pour visualiser les prédictions de risque sanitaire
-et les statistiques des restaurants.
+et les statistiques des restaurants avec graphiques interactifs Plotly.
+
+Fonctionnalités:
+- Visualisations interactives (graphiques circulaires, barres, jauges)
+- Statistiques en temps réel
+- Formulaire de prédiction
+- API REST intégrée
 
 Author: Grace Mandiangu
-Date: November 24, 2025
+Date: November 28, 2025
 """
 
 from flask import Flask, render_template, request, jsonify

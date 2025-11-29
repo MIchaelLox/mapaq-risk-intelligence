@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>À propos - MAPAQ Risk Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-utensils text-2xl"></i>
+                    <h1 class="text-2xl font-bold">MAPAQ Risk Intelligence</h1>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="/" class="hover:text-blue-200 transition">Accueil</a>
+                    <a href="/dashboard" class="hover:text-blue-200 transition">Dashboard</a>
+                    <a href="/predict-form" class="hover:text-blue-200 transition">Prédiction</a>
+                    <a href="/about" class="text-blue-200 font-semibold">À propos</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-500 to-blue-700 text-white py-12">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold mb-2">📖 À Propos du Projet</h2>
+            <p class="text-xl">Système intelligent de prédiction de risque sanitaire</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 py-12">
+        <!-- Project Overview -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h3 class="text-3xl font-bold mb-6 text-gray-800">
+                <i class="fas fa-project-diagram text-blue-600 mr-3"></i>
+                Vue d'Ensemble du Projet
+            </h3>
+            <p class="text-gray-700 text-lg leading-relaxed mb-4">
+                <strong>MAPAQ Risk Intelligence</strong> est un système de prédiction probabiliste qui évalue 
+                le niveau de risque sanitaire des restaurants au Québec en utilisant les données d'inspection 
+                du MAPAQ (Ministère de l'Agriculture, des Pêcheries et de l'Alimentation du Québec).
+            </p>
+            <p class="text-gray-700 text-lg leading-relaxed">
+                Le système utilise un moteur de probabilités conditionnelles avancé basé sur le théorème de Bayes 
+                pour analyser plusieurs facteurs et fournir des prédictions précises avec des explications détaillées.
+            </p>
+        </div>
+
+        <!-- Technologies -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h3 class="text-3xl font-bold mb-6 text-gray-800">
+                <i class="fas fa-code text-green-600 mr-3"></i>
+                Technologies Utilisées
+            </h3>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-bold text-xl mb-3 text-gray-800">Backend</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center text-gray-700">
+                            <i class="fab fa-python text-blue-500 mr-3 text-xl"></i>
+                            Python 3.10+
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-flask text-gray-700 mr-3 text-xl"></i>
+                            Flask (API REST & Dashboard)
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-table text-green-600 mr-3 text-xl"></i>
+                            Pandas & NumPy (Analyse de données)
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-brain text-purple-600 mr-3 text-xl"></i>
+                            Scikit-learn (Machine Learning)
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-xl mb-3 text-gray-800">Frontend</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center text-gray-700">
+                            <i class="fab fa-html5 text-orange-600 mr-3 text-xl"></i>
+                            HTML5 & CSS3
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-wind text-cyan-500 mr-3 text-xl"></i>
+                            TailwindCSS (Styling)
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fas fa-chart-line text-blue-600 mr-3 text-xl"></i>
+                            Plotly.js (Visualisations)
+                        </li>
+                        <li class="flex items-center text-gray-700">
+                            <i class="fab fa-js text-yellow-500 mr-3 text-xl"></i>
+                            JavaScript (Interactivité)
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h3 class="text-3xl font-bold mb-6 text-gray-800">
+                <i class="fas fa-star text-yellow-500 mr-3"></i>
+                Fonctionnalités Principales
+            </h3>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="border-l-4 border-blue-600 pl-4">
+                    <h4 class="font-bold text-lg mb-2 text-gray-800">Moteur de Probabilités v2</h4>
+                    <p class="text-gray-600">
+                        Calculs bayésiens avancés avec probabilités conditionnelles, théorème de Bayes, 
+                        et probabilités jointes pour des prédictions précises.
+                    </p>
+                </div>
+                <div class="border-l-4 border-green-600 pl-4">
+                    <h4 class="font-bold text-lg mb-2 text-gray-800">API REST Complète</h4>
+                    <p class="text-gray-600">
+                        Endpoints /predict, /predict/batch, et /predict/explain pour des prédictions 
+                        simples ou avec explications détaillées.
+                    </p>
+                </div>
+                <div class="border-l-4 border-purple-600 pl-4">
+                    <h4 class="font-bold text-lg mb-2 text-gray-800">Dashboard Interactif</h4>
+                    <p class="text-gray-600">
+                        Visualisations dynamiques avec Plotly : graphiques circulaires, barres, 
+                        jauges, et statistiques en temps réel.
+                    </p>
+                </div>
+                <div class="border-l-4 border-orange-600 pl-4">
+                    <h4 class="font-bold text-lg mb-2 text-gray-800">Ajustements Temporels</h4>
+                    <p class="text-gray-600">
+                        Prise en compte des changements réglementaires MAPAQ dans le temps pour 
+                        des prédictions contextualisées.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Architecture -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h3 class="text-3xl font-bold mb-6 text-gray-800">
+                <i class="fas fa-sitemap text-purple-600 mr-3"></i>
+                Architecture du Système
+            </h3>
+            <div class="bg-gray-50 p-6 rounded-lg font-mono text-sm">
+                <pre class="text-gray-700">
+mapaq-risk-intelligence/
+├── data/
+│   ├── raw/                    # Données brutes MAPAQ
+│   ├── cleaned/                # Données nettoyées
+│   └── regulations.json        # Réglementations
+├── src/
+│   ├── data_ingest.py          # Ingestion de données
+│   ├── data_cleaner.py         # Nettoyage & normalisation
+│   ├── probability_model.py    # Moteur de probabilités v2
+│   ├── regulation_adapter.py   # Ajustements temporels
+│   └── api.py                  # API REST
+├── dashboard/
+│   ├── app.py                  # Application dashboard
+│   └── templates/              # Templates HTML
+│       ├── index.html
+│       ├── dashboard.html
+│       ├── predict_form.html
+│       └── about.html
+└── tests/                      # Tests unitaires
+                </pre>
+            </div>
+        </div>
+
+        <!-- Developer -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg p-8 text-white">
+            <div class="flex items-center mb-6">
+                <div class="bg-white rounded-full p-4 mr-6">
+                    <i class="fas fa-user-circle text-blue-600 text-5xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-3xl font-bold mb-2">Grace Mandiangu</h3>
+                    <p class="text-blue-100 text-lg">Développeuse Full-Stack</p>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-bold text-xl mb-3">Contributions</h4>
+                    <ul class="space-y-2 text-blue-50">
+                        <li><i class="fas fa-check-circle mr-2"></i>Moteur de probabilités conditionnelles v2</li>
+                        <li><i class="fas fa-check-circle mr-2"></i>API REST avec explications détaillées</li>
+                        <li><i class="fas fa-check-circle mr-2"></i>Dashboard interactif avec Plotly</li>
+                        <li><i class="fas fa-check-circle mr-2"></i>Pipeline de nettoyage de données</li>
+                        <li><i class="fas fa-check-circle mr-2"></i>Système d'ajustements réglementaires</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-xl mb-3">Technologies Maîtrisées</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">Python</span>
+                        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">Flask</span>
+                        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">Pandas</span>
+                        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">NumPy</span>
+                        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">Plotly</span>
+                        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">TailwindCSS</span>
+                        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">JavaScript</span>
+                        <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">Machine Learning</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="text-center mt-12">
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">Contactez-nous</h3>
+            <div class="flex justify-center space-x-6">
+                <a href="#" class="text-gray-600 hover:text-blue-600 transition">
+                    <i class="fab fa-github text-3xl"></i>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-600 transition">
+                    <i class="fab fa-linkedin text-3xl"></i>
+                </a>
+                <a href="#" class="text-gray-600 hover:text-blue-600 transition">
+                    <i class="fas fa-envelope text-3xl"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-6 text-center">
+            <p class="mb-2">© 2025 MAPAQ Risk Intelligence</p>
+            <p class="text-gray-400">Développé par <strong>Grace Mandiangu</strong></p>
+            <p class="text-gray-500 text-sm mt-2">Projet de Stage - Novembre 2025</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -144,6 +144,19 @@ Python 3.10, pandas, scikit-learn, Flask/FastAPI, Plotly, Leaflet, pytest.
 - Integration with probability engine for seamless temporal adjustments
 - Timeline tracking and regulation history management
 
+**7. Interactive Dashboard** (`dashboard/`) - Grace Mandiangu
+- Flask-based web dashboard with modern UI (TailwindCSS)
+- Real-time statistics cards (total restaurants, risk distribution)
+- Interactive Plotly visualizations:
+  - Pie chart for risk distribution
+  - Bar charts for regional and cuisine type analysis
+  - Gauge chart for average risk level
+- Responsive design for mobile and desktop
+- Multiple pages: Home, Dashboard, Prediction Form, About
+- Error handling pages (404, 500)
+- Startup script `run_dashboard.py` for easy deployment
+- Integrated API endpoints for data fetching
+
 ### 📁 Current Project Structure
 ```
 mapaq-risk-intelligence/
@@ -165,9 +178,8 @@ mapaq-risk-intelligence/
 ### 🔄 Next Steps
 - Implement `theme_classifier.py` for cuisine type classification
 - Develop `address_geocoder.py` for address normalization and geocoding
-- Build interactive dashboard with Flask/React
 - Expand automated test coverage (pytest)
-- Add data visualization components
+- Add real-time data integration with MAPAQ API
 
 ---
 
@@ -205,6 +217,25 @@ python run_api.py
 cd src
 python api.py
 ```
+
+### Starting the Interactive Dashboard - Grace Mandiangu
+
+```bash
+# Using the startup script (recommended)
+python run_dashboard.py
+
+# Or directly
+cd dashboard
+python app.py
+```
+
+**Dashboard accessible on:** `http://localhost:8080`
+
+**Pages disponibles:**
+- `/` - Page d'accueil avec présentation
+- `/dashboard` - Dashboard avec visualisations Plotly interactives
+- `/predict-form` - Formulaire de prédiction
+- `/about` - À propos du projet et technologies
 
 ### API Request with Inspection Date
 
