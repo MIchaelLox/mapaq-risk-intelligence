@@ -126,10 +126,15 @@ Python 3.10, pandas, scikit-learn, Flask/FastAPI, Plotly, Leaflet, pytest.
 - Flask-based REST API implementation
 - POST `/predict` endpoint for single restaurant risk prediction
 - POST `/predict/batch` endpoint for multiple predictions
+- POST `/predict/explain` endpoint for detailed explanations with contributing factors (NEW - Grace Mandiangu)
 - GET `/health` endpoint for API health checks
 - Input validation and error handling
 - JSON response format with probabilities and confidence scores
 - Support for temporal regulation adjustments via `inspection_date` parameter
+- Automated recommendation system based on risk factors (NEW - Grace Mandiangu)
+- Confidence interpretation for prediction reliability (NEW - Grace Mandiangu)
+- Startup script `run_api.py` for easy deployment (NEW - Grace Mandiangu)
+- Comprehensive API documentation in `API_EXAMPLES.md` (NEW - Grace Mandiangu)
 
 **6. Temporal Regulation Weighting** (`src/regulation_adapter.py`) - Grace Mandiangu
 - Automatic temporal adjustment of risk scores based on regulatory changes
@@ -190,6 +195,17 @@ risk_level, confidence = engine.predict_risk_level(
 print(f"Risk Level: {risk_level} (Confidence: {confidence:.2%})")
 ```
 
+### Starting the API - Grace Mandiangu
+
+```bash
+# Using the startup script (recommended)
+python run_api.py
+
+# Or directly
+cd src
+python api.py
+```
+
 ### API Request with Inspection Date
 
 ```bash
@@ -200,10 +216,33 @@ curl -X POST http://localhost:5000/predict \
     "staff_count": 10,
     "infractions_history": 2,
     "kitchen_size": 35.0,
-    "region": "Quebec",
+    "region": "Montreal",
     "inspection_date": "2023-06-15"
   }'
 ```
+
+### API Request with Detailed Explanation (NEW - Grace Mandiangu)
+
+```bash
+curl -X POST http://localhost:5000/predict/explain \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cuisine_type": "Sushi",
+    "staff_count": 10,
+    "infractions_history": 2,
+    "kitchen_size": 35.0,
+    "region": "Montreal"
+  }'
+```
+
+**Response includes:**
+- Risk prediction with probabilities
+- Contributing factors analysis
+- Impact assessment for each factor
+- Automated recommendations
+- Confidence interpretation
+
+**See `API_EXAMPLES.md` for complete API documentation and more examples.**
 
 ### Managing Regulations
 
@@ -286,4 +325,4 @@ engine.update_priors(historical_data)
 ---
 
 **Author:** Grace Mandiangu  
-**Last Updated:** November 27, 2025
+**Last Updated:** November 28, 2025
