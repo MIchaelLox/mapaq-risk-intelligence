@@ -3,6 +3,16 @@ Module d'ingestion des données MAPAQ.
 
 Ce module gère le téléchargement et l'importation des données
 d'inspection des restaurants depuis les sources publiques du MAPAQ.
+
+Fonctionnalités:
+- Chargement de fichiers CSV locaux
+- Téléchargement depuis URL
+- Validation de schéma
+- Détection automatique d'encodage
+- Statistiques des données
+
+Author: Grace Mandiangu
+Date: November 30, 2025
 """
 
 import pandas as pd
@@ -85,8 +95,64 @@ class MAPAQDataIngestor:
             'nombre_lignes': len(df),
             'nombre_colonnes': len(df.columns),
             'colonnes': list(df.columns),
-            'valeurs_manquantes': df.isnull().sum().to_dict()
+            'valeurs_manquantes': df.isnull().sum().to_dict(),
+            'types_donnees': df.dtypes.astype(str).to_dict(),
+            'memoire_usage': f"{df.memory_usage(deep=True).sum() / 1024 / 1024:.2f} MB"
         }
+    
+    def validate_schema(self, df: pd.DataFrame, required_columns: list) -> Dict:
+        """
+        Valide le schéma du DataFrame.
+        
+        Args:
+            df: DataFrame à valider
+            required_columns: Liste des colonnes requises
+            
+        Returns:
+            Dictionnaire avec résultats de validation
+        """
+        missing_columns = set(required_columns) - set(df.columns)
+        extra_columns = set(df.columns) - set(required_columns)
+        
+        is_valid = len(missing_columns) == 0
+        
+        validation_result = {
+            'is_valid': is_valid,
+            'missing_columns': list(missing_columns),
+            'extra_columns': list(extra_columns),
+            'total_columns': len(df.columns)
+        }
+        
+        if is_valid:
+            logger.info("✓ Schéma validé avec succès")
+        else:
+            logger.warning(f"⚠️  Colonnes manquantes: {missing_columns}")
+        
+        return validation_result
+    
+    def detect_encoding(self, filepath: str) -> str:
+        """
+        Détecte l'encodage d'un fichier.
+        
+        Args:
+            filepath: Chemin du fichier
+            
+        Returns:
+            Encodage détecté
+        """
+        encodings = ['utf-8', 'utf-8-sig', 'latin-1', 'iso-8859-1', 'cp1252']
+        
+        for encoding in encodings:
+            try:
+                with open(filepath, 'r', encoding=encoding) as f:
+                    f.read()
+                logger.info(f"Encodage détecté: {encoding}")
+                return encoding
+            except UnicodeDecodeError:
+                continue
+        
+        logger.warning("Encodage non détecté, utilisation de utf-8 par défaut")
+        return 'utf-8'
 
 
 if __name__ == "__main__":

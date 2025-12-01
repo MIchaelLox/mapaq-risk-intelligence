@@ -157,6 +157,25 @@ Python 3.10, pandas, scikit-learn, Flask/FastAPI, Plotly, Leaflet, pytest.
 - Startup script `run_dashboard.py` for easy deployment
 - Integrated API endpoints for data fetching
 
+**8. Full Data Pipeline** (`src/data_pipeline.py`) - Grace Mandiangu
+- Complete end-to-end data processing orchestration
+- 5-stage pipeline: Ingestion → Validation → Cleaning → Transformation → Output
+- Configurable via JSON configuration file (`pipeline_config.json`)
+- Automated data quality validation with business rules
+- Advanced data cleaning with multiple strategies:
+  - Missing values handling (drop, mean, median, mode)
+  - Outlier detection (IQR and Z-score methods)
+  - Text normalization and standardization
+- Data transformation and feature engineering:
+  - Staff categorization (Très petit, Petit, Moyen, Grand)
+  - Risk categorization (Aucun, Faible, Moyen, Élevé)
+  - Derived features creation
+- Multi-format output (CSV, JSON)
+- Comprehensive reporting with statistics and quality metrics
+- Startup script `run_pipeline.py` with CLI interface
+- Enhanced `data_ingest.py` with schema validation and encoding detection
+- Enhanced `data_cleaner.py` with advanced cleaning methods
+
 ### 📁 Current Project Structure
 ```
 mapaq-risk-intelligence/
@@ -300,6 +319,31 @@ adapter.add_regulation(
 adapter.save_regulations()
 ```
 
+### Running the Full Data Pipeline - Grace Mandiangu
+
+```bash
+# Using the CLI script (recommended)
+python run_pipeline.py data/raw/restaurants.csv -o processed_data
+
+# With custom configuration
+python run_pipeline.py data/raw/restaurants.csv -c pipeline_config.json
+
+# Check pipeline status
+python run_pipeline.py --status
+```
+
+**Pipeline stages:**
+1. **Ingestion** - Load raw CSV data
+2. **Validation** - Check business rules and data quality
+3. **Cleaning** - Remove duplicates, handle missing values
+4. **Transformation** - Create features, categorize data
+5. **Output** - Save processed data (CSV/JSON) + generate report
+
+**Output files:**
+- `data/processed/processed_data.csv` - Cleaned data
+- `data/processed/processed_data.json` - JSON format
+- `data/reports/processed_data_report.json` - Quality report
+
 ### Using Advanced Probability Features (v2) - Grace Mandiangu
 
 ```python
@@ -356,4 +400,4 @@ engine.update_priors(historical_data)
 ---
 
 **Author:** Grace Mandiangu  
-**Last Updated:** November 28, 2025
+**Last Updated:** November 30, 2025

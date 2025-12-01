@@ -1,0 +1,87 @@
+{
+  "pipeline_info": {
+    "name": "MAPAQ Risk Intelligence Data Pipeline",
+    "version": "1.0",
+    "author": "Grace Mandiangu",
+    "description": "Pipeline complet de traitement des données d'inspection MAPAQ"
+  },
+  "directories": {
+    "raw_data_dir": "data/raw",
+    "cleaned_data_dir": "data/cleaned",
+    "processed_data_dir": "data/processed",
+    "reports_dir": "data/reports"
+  },
+  "required_columns": [
+    "nom_etablissement",
+    "adresse",
+    "ville",
+    "type_cuisine",
+    "nombre_employes",
+    "infractions"
+  ],
+  "optional_columns": [
+    "taille_cuisine",
+    "region",
+    "date_inspection",
+    "code_postal"
+  ],
+  "validation_rules": {
+    "nombre_employes": {
+      "min": 0,
+      "max": 500,
+      "description": "Nombre d'employés doit être entre 0 et 500"
+    },
+    "infractions": {
+      "min": 0,
+      "max": 100,
+      "description": "Nombre d'infractions doit être entre 0 et 100"
+    },
+    "taille_cuisine": {
+      "min": 5,
+      "max": 1000,
+      "description": "Taille de la cuisine en m² entre 5 et 1000"
+    }
+  },
+  "data_types": {
+    "nom_etablissement": "string",
+    "adresse": "string",
+    "ville": "string",
+    "type_cuisine": "string",
+    "nombre_employes": "integer",
+    "infractions": "integer",
+    "taille_cuisine": "float",
+    "region": "string"
+  },
+  "cleaning_options": {
+    "remove_duplicates": true,
+    "handle_missing_values": "drop_rows",
+    "normalize_text": true,
+    "trim_whitespace": true,
+    "lowercase_columns": true
+  },
+  "transformation_options": {
+    "create_derived_features": true,
+    "add_metadata": true,
+    "categorize_staff": true,
+    "categorize_risk": true
+  },
+  "staff_categories": {
+    "bins": [0, 5, 15, 50, 1000],
+    "labels": ["Très petit", "Petit", "Moyen", "Grand"]
+  },
+  "risk_categories": {
+    "bins": [-1, 0, 2, 5, 1000],
+    "labels": ["Aucun", "Faible", "Moyen", "Élevé"]
+  },
+  "output_formats": {
+    "csv": true,
+    "json": true,
+    "excel": false
+  },
+  "reporting": {
+    "generate_summary": true,
+    "include_statistics": true,
+    "include_validation_details": true,
+    "save_report_json": true
+  }
+}
