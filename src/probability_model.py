@@ -1,10 +1,10 @@
 """
 Module de calcul de probabilités conditionnelles pour la prédiction de risque sanitaire.
 
-Conditional Probability Engine v2 - Moteur avancé de probabilités bayésiennes pour
+Conditional Probability Engine v3 - Moteur avancé de probabilités bayésiennes pour
 calculer le risque sanitaire des restaurants basé sur plusieurs facteurs.
 
-Fonctionnalités v2:
+Fonctionnalités v3 (Enhanced - Grace Mandiangu):
 - Calcul de probabilités conditionnelles P(A|B) à partir de données historiques
 - Théorème de Bayes pour inférence probabiliste
 - Probabilités jointes pour événements multiples
@@ -12,16 +12,26 @@ Fonctionnalités v2:
 - Matrice de probabilités conditionnelles
 - Ajustements temporels basés sur les réglementations
 - Prédiction multi-facteurs (cuisine, staff, infractions, taille, région)
+- Calibration du modèle avec données historiques (NEW)
+- Validation croisée et métriques de performance (NEW)
+- Analyse de sensibilité des facteurs (NEW)
+- Persistance et chargement du modèle (NEW)
+- Intervalles de confiance pour les prédictions (NEW)
 
 Author: Grace Mandiangu
-Date: November 27, 2025
+Date: December 1, 2025
 """
 
 import numpy as np
 import pandas as pd
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, List
 from datetime import datetime
 import logging
+import json
+import pickle
+from pathlib import Path
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+from sklearn.model_selection import cross_val_score
 
 try:
     from regulation_adapter import RegulationAdapter
@@ -465,6 +475,309 @@ class ConditionalProbabilityEngine:
         
         logger.info("Matrice de probabilités conditionnelles générée")
         return contingency_table
+    
+    def calibrate_model(self, training_data: pd.DataFrame) -> Dict:
+        """
+        Calibre le modèle avec des données d'entraînement historiques.
+        
+        Args:
+            training_data: DataFrame avec colonnes requises pour l'entraînement
+            
+        Returns:
+            Dictionnaire avec métriques de calibration
+        
+        Author: Grace Mandiangu (v3 Enhancement)
+        """
+        logger.info("Début de la calibration du modèle...")
+        
+        required_cols = ['cuisine_type', 'staff_count', 'infractions_history', 
+                        'kitchen_size', 'region', 'actual_risk_level']
+        
+        if not all(col in training_data.columns for col in required_cols):
+            logger.error(f"Colonnes requises manquantes: {required_cols}")
+            return {}
+        
+        # Apprendre les probabilités à partir des données
+        self.learn_cuisine_probabilities(training_data.rename(
+            columns={'actual_risk_level': 'risk_level'}
+        ))
+        
+        # Calculer les prédictions
+        predictions = []
+        actuals = []
+        
+        for _, row in training_data.iterrows():
+            predicted_level, _ = self.predict_risk_level(
+                cuisine_type=row['cuisine_type'],
+                staff_count=int(row['staff_count']),
+                infractions_history=int(row['infractions_history']),
+                kitchen_size=float(row['kitchen_size']),
+                region=row['region']
+            )
+            predictions.append(predicted_level)
+            actuals.append(row['actual_risk_level'])
+        
+        # Calculer les métriques
+        metrics = {
+            'accuracy': accuracy_score(actuals, predictions),
+            'precision_macro': precision_score(actuals, predictions, average='macro', zero_division=0),
+            'recall_macro': recall_score(actuals, predictions, average='macro', zero_division=0),
+            'f1_macro': f1_score(actuals, predictions, average='macro', zero_division=0),
+            'confusion_matrix': confusion_matrix(actuals, predictions, labels=['Low', 'Medium', 'High']).tolist(),
+            'training_samples': len(training_data)
+        }
+        
+        logger.info(f"Calibration terminée - Accuracy: {metrics['accuracy']:.2%}")
+        return metrics
+    
+    def cross_validate(self, data: pd.DataFrame, n_folds: int = 5) -> Dict:
+        """
+        Effectue une validation croisée du modèle.
+        
+        Args:
+            data: DataFrame avec données de validation
+            n_folds: Nombre de folds pour la validation croisée
+            
+        Returns:
+            Dictionnaire avec résultats de validation
+        
+        Author: Grace Mandiangu (v3 Enhancement)
+        """
+        logger.info(f"Validation croisée avec {n_folds} folds...")
+        
+        from sklearn.model_selection import KFold
+        
+        kf = KFold(n_splits=n_folds, shuffle=True, random_state=42)
+        fold_scores = []
+        
+        for fold, (train_idx, test_idx) in enumerate(kf.split(data), 1):
+            train_data = data.iloc[train_idx]
+            test_data = data.iloc[test_idx]
+            
+            # Calibrer sur le fold d'entraînement
+            self.calibrate_model(train_data)
+            
+            # Tester sur le fold de test
+            predictions = []
+            actuals = []
+            
+            for _, row in test_data.iterrows():
+                pred, _ = self.predict_risk_level(
+                    cuisine_type=row['cuisine_type'],
+                    staff_count=int(row['staff_count']),
+                    infractions_history=int(row['infractions_history']),
+                    kitchen_size=float(row['kitchen_size']),
+                    region=row['region']
+                )
+                predictions.append(pred)
+                actuals.append(row['actual_risk_level'])
+            
+            fold_accuracy = accuracy_score(actuals, predictions)
+            fold_scores.append(fold_accuracy)
+            logger.info(f"Fold {fold}: Accuracy = {fold_accuracy:.2%}")
+        
+        results = {
+            'mean_accuracy': np.mean(fold_scores),
+            'std_accuracy': np.std(fold_scores),
+            'fold_scores': fold_scores,
+            'n_folds': n_folds
+        }
+        
+        logger.info(f"Validation croisée terminée - Accuracy moyenne: {results['mean_accuracy']:.2%} ± {results['std_accuracy']:.2%}")
+        return results
+    
+    def sensitivity_analysis(
+        self,
+        cuisine_type: str,
+        staff_count: int,
+        infractions_history: int,
+        kitchen_size: float,
+        region: str
+    ) -> Dict:
+        """
+        Analyse la sensibilité des prédictions aux différents facteurs.
+        
+        Args:
+            cuisine_type, staff_count, infractions_history, kitchen_size, region: Paramètres de base
+            
+        Returns:
+            Dictionnaire avec analyse de sensibilité pour chaque facteur
+        
+        Author: Grace Mandiangu (v3 Enhancement)
+        """
+        logger.info("Analyse de sensibilité des facteurs...")
+        
+        base_probs = self.calculate_risk_probability(
+            cuisine_type, staff_count, infractions_history, kitchen_size, region
+        )
+        
+        sensitivity = {
+            'base_prediction': base_probs,
+            'staff_sensitivity': {},
+            'infractions_sensitivity': {},
+            'kitchen_sensitivity': {}
+        }
+        
+        # Sensibilité au nombre d'employés
+        for staff_variation in [-5, -2, 0, 2, 5]:
+            new_staff = max(1, staff_count + staff_variation)
+            probs = self.calculate_risk_probability(
+                cuisine_type, new_staff, infractions_history, kitchen_size, region
+            )
+            sensitivity['staff_sensitivity'][f'staff_{new_staff}'] = probs
+        
+        # Sensibilité aux infractions
+        for infraction_variation in [-1, 0, 1, 2]:
+            new_infractions = max(0, infractions_history + infraction_variation)
+            probs = self.calculate_risk_probability(
+                cuisine_type, staff_count, new_infractions, kitchen_size, region
+            )
+            sensitivity['infractions_sensitivity'][f'infractions_{new_infractions}'] = probs
+        
+        # Sensibilité à la taille de cuisine
+        for kitchen_variation in [-10, -5, 0, 5, 10]:
+            new_kitchen = max(5, kitchen_size + kitchen_variation)
+            probs = self.calculate_risk_probability(
+                cuisine_type, staff_count, infractions_history, new_kitchen, region
+            )
+            sensitivity['kitchen_sensitivity'][f'kitchen_{new_kitchen}'] = probs
+        
+        logger.info("Analyse de sensibilité terminée")
+        return sensitivity
+    
+    def predict_with_confidence(
+        self,
+        cuisine_type: str,
+        staff_count: int,
+        infractions_history: int,
+        kitchen_size: float,
+        region: str,
+        inspection_date: Optional[datetime] = None
+    ) -> Dict:
+        """
+        Prédit le niveau de risque avec intervalle de confiance.
+        
+        Args:
+            cuisine_type, staff_count, infractions_history, kitchen_size, region: Paramètres
+            inspection_date: Date d'inspection optionnelle
+            
+        Returns:
+            Dictionnaire avec prédiction, probabilités et intervalle de confiance
+        
+        Author: Grace Mandiangu (v3 Enhancement)
+        """
+        probs = self.calculate_risk_probability(
+            cuisine_type, staff_count, infractions_history, kitchen_size, region, inspection_date
+        )
+        
+        risk_level = max(probs, key=probs.get)
+        probability = probs[risk_level]
+        
+        # Calculer l'intervalle de confiance (basé sur l'entropie)
+        entropy = -sum(p * np.log2(p + 1e-10) for p in probs.values())
+        max_entropy = np.log2(3)  # Pour 3 classes
+        confidence_score = 1 - (entropy / max_entropy)
+        
+        # Déterminer le niveau de confiance
+        if confidence_score >= 0.8:
+            confidence_level = "Très élevée"
+        elif confidence_score >= 0.6:
+            confidence_level = "Élevée"
+        elif confidence_score >= 0.4:
+            confidence_level = "Moyenne"
+        else:
+            confidence_level = "Faible"
+        
+        result = {
+            'predicted_risk': risk_level,
+            'probability': probability,
+            'all_probabilities': probs,
+            'confidence_score': confidence_score,
+            'confidence_level': confidence_level,
+            'entropy': entropy
+        }
+        
+        logger.info(f"Prédiction: {risk_level} ({probability:.2%}) - Confiance: {confidence_level} ({confidence_score:.2%})")
+        return result
+    
+    def save_model(self, filepath: str) -> bool:
+        """
+        Sauvegarde le modèle calibré dans un fichier.
+        
+        Args:
+            filepath: Chemin du fichier de sauvegarde
+            
+        Returns:
+            True si sauvegardé avec succès
+        
+        Author: Grace Mandiangu (v3 Enhancement)
+        """
+        try:
+            model_data = {
+                'prior_risk': self.prior_risk,
+                'cuisine_risk_probs': self.cuisine_risk_probs,
+                'staff_thresholds': self.staff_thresholds,
+                'infraction_weights': self.infraction_weights,
+                'temporal_adjustment_enabled': self.temporal_adjustment_enabled,
+                'version': '3.0',
+                'saved_date': datetime.now().isoformat()
+            }
+            
+            with open(filepath, 'wb') as f:
+                pickle.dump(model_data, f)
+            
+            logger.info(f"Modèle sauvegardé: {filepath}")
+            return True
+        
+        except Exception as e:
+            logger.error(f"Erreur lors de la sauvegarde: {str(e)}")
+            return False
+    
+    def load_model(self, filepath: str) -> bool:
+        """
+        Charge un modèle calibré depuis un fichier.
+        
+        Args:
+            filepath: Chemin du fichier à charger
+            
+        Returns:
+            True si chargé avec succès
+        
+        Author: Grace Mandiangu (v3 Enhancement)
+        """
+        try:
+            with open(filepath, 'rb') as f:
+                model_data = pickle.load(f)
+            
+            self.prior_risk = model_data['prior_risk']
+            self.cuisine_risk_probs = model_data['cuisine_risk_probs']
+            self.staff_thresholds = model_data['staff_thresholds']
+            self.infraction_weights = model_data['infraction_weights']
+            
+            logger.info(f"Modèle chargé: {filepath} (version {model_data.get('version', 'unknown')})")
+            return True
+        
+        except Exception as e:
+            logger.error(f"Erreur lors du chargement: {str(e)}")
+            return False
+    
+    def get_model_summary(self) -> Dict:
+        """
+        Retourne un résumé des paramètres du modèle.
+        
+        Returns:
+            Dictionnaire avec résumé du modèle
+        
+        Author: Grace Mandiangu (v3 Enhancement)
+        """
+        return {
+            'version': '3.0',
+            'prior_risk_distribution': self.prior_risk,
+            'cuisine_types_supported': list(self.cuisine_risk_probs.keys()),
+            'temporal_adjustment': self.temporal_adjustment_enabled,
+            'staff_thresholds': self.staff_thresholds,
+            'infraction_weights': self.infraction_weights
+        }
 
 
 if __name__ == "__main__":

@@ -110,7 +110,7 @@ Python 3.10, pandas, scikit-learn, Flask/FastAPI, Plotly, Leaflet, pytest.
 - Text field cleaning and standardization
 - Cleaning report generation
 
-**4. Conditional Probability Engine v2** (`src/probability_model.py`) - Grace Mandiangu
+**4. Conditional Probability Engine v3 (Enhanced)** (`src/probability_model.py`) - Grace Mandiangu
 - Advanced Bayesian probability calculations for risk prediction
 - Multi-factor risk assessment (cuisine, staff, infractions, kitchen size, region)
 - Three-level risk categorization (Low/Medium/High)
@@ -121,6 +121,12 @@ Python 3.10, pandas, scikit-learn, Flask/FastAPI, Plotly, Leaflet, pytest.
 - Probability matrix generation for risk analysis
 - Prior probability updates with new data
 - Integration with temporal regulation adjustments
+- **Model calibration with historical data** (NEW - Grace Mandiangu)
+- **Cross-validation and performance metrics** (accuracy, precision, recall, F1) (NEW - Grace Mandiangu)
+- **Sensitivity analysis** for factor importance (NEW - Grace Mandiangu)
+- **Confidence intervals** for predictions with entropy-based scoring (NEW - Grace Mandiangu)
+- **Model persistence** (save/load calibrated models) (NEW - Grace Mandiangu)
+- **Comprehensive test suite** (`test_enhanced_model.py`) (NEW - Grace Mandiangu)
 
 **5. REST API with /predict Endpoint** (`src/api.py`) - Grace Mandiangu
 - Flask-based REST API implementation
@@ -344,6 +350,66 @@ python run_pipeline.py --status
 - `data/processed/processed_data.json` - JSON format
 - `data/reports/processed_data_report.json` - Quality report
 
+### Using Enhanced Model Features (v3) - Grace Mandiangu
+
+```python
+import pandas as pd
+from src.probability_model import ConditionalProbabilityEngine
+
+# Initialize engine
+engine = ConditionalProbabilityEngine()
+
+# 1. Model Calibration with Historical Data
+training_data = pd.DataFrame({
+    'cuisine_type': ['Sushi', 'Fast Food', 'Fine Dining', ...],
+    'staff_count': [10, 15, 8, ...],
+    'infractions_history': [2, 1, 0, ...],
+    'kitchen_size': [35.0, 50.0, 40.0, ...],
+    'region': ['Montreal', 'Quebec', 'Laval', ...],
+    'actual_risk_level': ['High', 'Medium', 'Low', ...]
+})
+
+metrics = engine.calibrate_model(training_data)
+print(f"Model Accuracy: {metrics['accuracy']:.2%}")
+print(f"F1-Score: {metrics['f1_macro']:.2%}")
+
+# 2. Cross-Validation
+cv_results = engine.cross_validate(training_data, n_folds=5)
+print(f"CV Accuracy: {cv_results['mean_accuracy']:.2%} ± {cv_results['std_accuracy']:.2%}")
+
+# 3. Prediction with Confidence Intervals
+result = engine.predict_with_confidence(
+    cuisine_type="Sushi",
+    staff_count=10,
+    infractions_history=2,
+    kitchen_size=35.0,
+    region="Montreal"
+)
+print(f"Prediction: {result['predicted_risk']}")
+print(f"Confidence: {result['confidence_level']} ({result['confidence_score']:.2%})")
+
+# 4. Sensitivity Analysis
+sensitivity = engine.sensitivity_analysis(
+    cuisine_type="Sushi",
+    staff_count=10,
+    infractions_history=2,
+    kitchen_size=35.0,
+    region="Montreal"
+)
+print("Impact of staff variations on High risk:")
+for key, probs in sensitivity['staff_sensitivity'].items():
+    print(f"  {key}: {probs['High']:.2%}")
+
+# 5. Save/Load Calibrated Model
+engine.save_model('data/calibrated_model.pkl')
+# Later...
+new_engine = ConditionalProbabilityEngine()
+new_engine.load_model('data/calibrated_model.pkl')
+
+# 6. Run Comprehensive Tests
+# python test_enhanced_model.py
+```
+
 ### Using Advanced Probability Features (v2) - Grace Mandiangu
 
 ```python
@@ -400,4 +466,4 @@ engine.update_priors(historical_data)
 ---
 
 **Author:** Grace Mandiangu  
-**Last Updated:** November 30, 2025
+**Last Updated:** December 1, 2025
