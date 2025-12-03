@@ -54,8 +54,8 @@ def print_banner():
     • Jauge - Niveau de risque moyen
     
     🔧 Configuration:
-    • Host: 0.0.0.0
-    • Port: 8080
+    • Host: 127.0.0.1
+    • Port: 5050
     • Mode: Development
     
     👤 Développé par: Grace Mandiangu
@@ -135,20 +135,20 @@ def main():
         
         # Démarrer le serveur
         logger.info("🚀 Démarrage du serveur Dashboard...")
-        logger.info("📍 Dashboard accessible sur: http://localhost:8080")
+        logger.info("📍 Dashboard accessible sur: http://localhost:5050")
         logger.info("📖 Pages:")
-        logger.info("   • Accueil:    http://localhost:8080/")
-        logger.info("   • Dashboard:  http://localhost:8080/dashboard")
-        logger.info("   • Prédiction: http://localhost:8080/predict-form")
-        logger.info("   • À propos:   http://localhost:8080/about")
+        logger.info("   • Accueil:    http://localhost:5050/")
+        logger.info("   • Dashboard:  http://localhost:5050/dashboard")
+        logger.info("   • Prédiction: http://localhost:5050/predict-form")
+        logger.info("   • À propos:   http://localhost:5050/about")
         logger.info("")
         logger.info("Appuyez sur CTRL+C pour arrêter le serveur")
         logger.info("═" * 63)
         
         # Lancer l'application Flask
         app.run(
-            host='0.0.0.0',
-            port=8080,
+            host='127.0.0.1',
+            port=5050,
             debug=True,
             use_reloader=True
         )
