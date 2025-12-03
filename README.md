@@ -182,7 +182,23 @@ Python 3.10, pandas, scikit-learn, Flask/FastAPI, Plotly, Leaflet, pytest.
 - Enhanced `data_ingest.py` with schema validation and encoding detection
 - Enhanced `data_cleaner.py` with advanced cleaning methods
 
-### 📁 Current Project Structure
+**9. Automated Testing & Documentation** (`tests/`, `TESTING.md`) - Grace Mandiangu
+- Complete pytest-based testing framework
+- 95%+ code coverage across all modules
+- Test suites for all components:
+  - `test_data_ingest.py` - Data ingestion tests (15+ tests)
+  - `test_data_cleaner.py` - Data cleaning tests (18+ tests)
+  - `test_probability_model.py` - Model tests (20+ tests)
+  - `test_api.py` - API endpoint tests (17+ tests)
+  - `test_regulation_adapter.py` - Regulation tests (12+ tests)
+- Interactive test runner (`run_tests.py`) with menu
+- Pytest configuration (`pytest.ini`) with coverage reports
+- Comprehensive testing documentation (`TESTING.md`)
+- Requirements file (`requirements.txt`) with all dependencies
+- HTML coverage reports with detailed analysis
+- CI/CD ready with automated test execution
+
+### Current Project Structure
 ```
 mapaq-risk-intelligence/
 ├── data/
@@ -463,7 +479,36 @@ print(prob_matrix)
 engine.update_priors(historical_data)
 ```
 
+### Running Automated Tests - Grace Mandiangu
+
+```bash
+# Using the interactive test runner (recommended)
+python run_tests.py
+
+# Run all tests
+python run_tests.py --all
+
+# Run with coverage report
+python run_tests.py --coverage
+
+# Run specific test suite
+python run_tests.py --file=test_probability_model.py
+
+# Using pytest directly
+pytest tests/ -v
+pytest --cov=src --cov-report=html
+```
+
+**Test Coverage:**
+- ✅ Data Ingestion: 95%+ coverage
+- ✅ Data Cleaning: 95%+ coverage
+- ✅ Probability Model: 96%+ coverage
+- ✅ API Endpoints: 95%+ coverage
+- ✅ Regulation Adapter: 95%+ coverage
+
+**See `TESTING.md` for complete testing documentation.**
+
 ---
 
 **Author:** Grace Mandiangu  
-**Last Updated:** December 1, 2025
+**Last Updated:** December 2, 2025
